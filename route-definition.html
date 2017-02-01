@@ -1,0 +1,29 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="router-service.html">
+
+
+<dom-module id="route-definition">
+  <template>
+    <router-service id="service"></router-service>
+    <slot id="slot"></slot>
+  </template>
+  <script>
+    Polymer({
+      is: 'route-definition',
+      properties: {
+        path: {
+          type: String
+        },
+        outlet: {
+          type: String
+        }
+      },
+      attached: function () {
+        var template = this.getEffectiveChildren()[0];
+        this.$.service.registerDefinition(this.path, template, this.outlet);
+      }
+
+    });
+  </script>
+</dom-module>

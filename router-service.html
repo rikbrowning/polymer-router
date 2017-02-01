@@ -1,0 +1,27 @@
+<script>
+    (function (window) {
+        if (!window.RouterService) {
+            window.RouterService = {
+                routes: []
+            }
+        }
+    })(window);
+</script>
+
+<dom-module id="router-service">
+    <template>
+    </template>
+    <script>
+        Polymer({
+            is: 'router-service',
+            routes: window.RouterService.routes,
+            registerDefinition: function (path, template, outlet) {
+                this.routes.push({
+                    path: path,
+                    template: template,
+                    outlet: outlet,
+                })
+            }
+        });
+    </script>
+</dom-module>
