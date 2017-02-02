@@ -1,9 +1,78 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../app-route/app-location.html">
+
 <script>
     (function (window) {
         if (!window.RouterService) {
-            window.RouterService = {
-                routes: []
+            var definitions = [];
+            var outlets = {};
+            var currentRoute = {};
+            var routeUpdated = function (route) {
+                var outletKeys = Object.keys(outlets);
+                if (definitions.length === 0 || outletKeys.length === 0) {
+                    return;
+                }
+                definitions.forEach(function (definition) {
+                    var queryParamsFromPath = matcher(definition.path, route.path);
+                    if (!queryParamsFromPath) {
+                        return;
+                    }
+                    var queryParams = Object.assign({}, route.__queryParams, queryParamsFromPath);
+                    if (!definition.outlet && outletKeys.indexOf("__default") >= 0) {
+                        outlets["__default"].changeTemplate(definition.template, queryParams);
+                        outletKeys = outletKeys.splice(outletKeys.indexOf("__default"), 1)
+                    } else if (outletKeys.indexOf(defintion.outlet) >= 0) {
+                        outlets[definition.outlet].changeTemplate(definition.template, queryParams);
+                        outletKeys = outletKeys.splice(outletKeys.indexOf(definition.outlet), 1);
+                    }
+                })
+
+            };
+            var sanitizePattern = function (pattern) {
+                if (!pattern) {
+                    return "";
+                }
+                if (pattern.charAt(0) === "/") {
+                    pattern = pattern.substring(1);
+                }
+                if (pattern.charAt(pattern.length - 1) === "/") {
+                    pattern = pattern.substring(0, pattern.length - 1);
+                }
+                return pattern;
             }
+            var matcher = function (pattern, path) {
+                pattern = sanitizePattern(pattern);
+                var patternArray = pattern.split("/");
+                if (patternArray.length === 0) {
+                    return false;
+                }
+                var pathArray = path.split("/");
+                if (pathArray.length !== patternArray.length) {
+                    return false;
+                }
+                var queryParamsFromPath = {};
+                var matched = pathArray.every(function (pathPart, index) {
+                    var patternPart = patternArray[index];
+                    if (patternPart.startsWith(":")) {
+                        queryParamsFromPath[patternPart.substring(1)] = pathPart;
+                        return true;
+                    }
+                    return patternPart === pathPart;
+                });
+                if (matched) {
+                    return queryParamsFromPath;
+                }
+                return false;
+            }
+            window.RouterService = {
+                definitions: definitions,
+                outlets: outlets,
+                locationAdded: false,
+                routeUpdated: routeUpdated,
+                _sanatizePattern: sanitizePattern,
+                _matcher: matcher
+            };
         }
     })(window);
 </script>
@@ -14,11 +83,27 @@
     <script>
         Polymer({
             is: 'router-service',
-            routes: window.RouterService.routes,
+            behaviors: [Polymer.Templatizer],
+            definitions: window.RouterService.definitions,
+            attached: function () {
+                if (!window.RouterService.locationAdded) {
+                    window.RouterService.locationAdded = true;
+                    //only add app location once
+                    //this will provide all the location updates to the service singleton.
+                    var location = document.createElement("app-location");
+                    Polymer.dom(this).appendChild(location);
+                    var routeUpdated = function () {
+                        this.debounce("routeUpdated", function () {
+                            window.RouterService.routeUpdated(location.route);
+                        }, 100)
+                    }.bind(this);
+                    location.addEventListener('route-changed', routeUpdated);
+                }
+            },
             registerDefinition: function (path, template, outlet) {
-                this.routes.push({
+                this.definitions.push({
                     path: path,
-                    template: template,
+                    template: this.templatize(template),
                     outlet: outlet,
                 })
             }

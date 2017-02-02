@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>polymer-router test</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../router-service.html">
+</head>
+
+<body>
+  <test-fixture id="basic">
+    <template>
+      <router-service></router-service>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('router-service', function () {
+      describe('sanitize pattern', function () {
+        it("should strip first char if /", function () {
+          var result = window.RouterService._sanatizePattern("/hello/world");
+          expect(result).to.equal("hello/world");
+        });
+        it("should strip last char if /", function () {
+          var result = window.RouterService._sanatizePattern("hello/world/");
+          expect(result).to.equal("hello/world");
+        });
+        it("should strip first and last char if /", function () {
+          var result = window.RouterService._sanatizePattern("/hello/world/");
+          expect(result).to.equal("hello/world")
+        })
+        it("should leave string alone if no beginning or trailing /", function () {
+          var result = window.RouterService._sanatizePattern("hello/world");
+          expect(result).to.equal("hello/world")
+        })
+        it("should return empty string if given null", function () {
+          var result = window.RouterService._sanatizePattern(null);
+          expect(result).to.equal("")
+        })
+      });
+      describe("matcher function", function () {
+        it("should match route with only 1 length", function () {
+          expect(window.RouterService._matcher("hello", "hello")).to.be.ok;
+        })
+        it("should not match different lengths", function () {
+          expect(window.RouterService._matcher("hello", "hello/world")).to.not.be.ok;
+        })
+        it("should match route with 2 parts", function () {
+          expect(window.RouterService._matcher("hello/world/", "hello/world")).to.be.ok;
+        })
+        it("should not match routes with 1 part misspelled", function () {
+          expect(window.RouterService._matcher("hello/worl/", "hello/world")).to.not.be.ok;
+        })
+        it("should extract single param", function () {
+          var result = window.RouterService._matcher("hello/:name/", "hello/world");
+          expect(result).to.be.ok;
+          expect(result.name).to.equal("world");
+        })
+        it("should extract single param in middle of pattern", function () {
+          var result = window.RouterService._matcher("hello/:name/boo", "hello/world/boo");
+          expect(result).to.be.ok;
+          expect(result.name).to.equal("world");
+        })
+        it("should not match misspelled even with param in middle", function () {
+          var result = window.RouterService._matcher("hello/:name/bo", "hello/world/boo");
+          expect(result).to.not.be.ok;
+        })
+        it("should extract two patterns", function () {
+          var result = window.RouterService._matcher("hello/:name/:age", "hello/world/13");
+          expect(result).to.be.ok;
+          expect(result.name).to.equal("world");
+          expect(result.age).to.equal("13");
+        })
+      })
+    });
+  </script>
+</body>
+
+</html>
