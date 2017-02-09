@@ -54,7 +54,7 @@
                 var queryParamsFromPath = {};
                 var matched = pathArray.every(function (pathPart, index) {
                     var patternPart = patternArray[index];
-                    if (patternPart.startsWith(":")) {
+                    if (patternPart[0] === ":") {
                         queryParamsFromPath[patternPart.substring(1)] = pathPart;
                         return true;
                     }
