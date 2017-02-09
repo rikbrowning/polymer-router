@@ -1,0 +1,29 @@
+{
+  "plugins": {
+    "sauce": {
+      "disabled": true,
+      "browsers": [
+        {
+          "browserName": "Chrome",
+          "platform": "Windows 10",
+          "version": "latest"
+        },
+        {
+          "browserName": "microsoftedge",
+          "platform": "Windows 10",
+          "version": "latest"
+        },
+        {
+          "browserName": "internet explorer",
+          "platform": "Windows 8.1",
+          "version": "latest"
+        },
+        {
+          "browserName": "safari",
+          "platform": "OS X 10.11",
+          "version": "latest"
+        }
+      ]
+    }
+  }
+}
