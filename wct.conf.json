@@ -4,24 +4,19 @@
       "disabled": true,
       "browsers": [
         {
-          "browserName": "Chrome",
-          "platform": "Windows 10",
-          "version": "latest"
-        },
-        {
           "browserName": "microsoftedge",
           "platform": "Windows 10",
-          "version": "latest"
+          "version": ""
         },
         {
           "browserName": "internet explorer",
           "platform": "Windows 8.1",
-          "version": "latest"
+          "version": "11"
         },
         {
           "browserName": "safari",
           "platform": "OS X 10.11",
-          "version": "latest"
+          "version": "9"
         }
       ]
     }
